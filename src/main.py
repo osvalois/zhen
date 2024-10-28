@@ -103,6 +103,7 @@ class DatabaseManager:
         self.db_path = db_path
         self.mutex = QMutex()
         self.init_database()
+        self.create_template_tables()
 
     def init_database(self):
         """Initialize database with required tables"""
@@ -142,43 +143,101 @@ class DatabaseManager:
                     FOREIGN KEY (query_id) REFERENCES queries (id)
                 );
 
-                -- Templates table
-                CREATE TABLE IF NOT EXISTS templates (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    category TEXT,
-                    platform TEXT NOT NULL,
-                    query_template TEXT NOT NULL,
-                    parameters TEXT,
-                    description TEXT,
-                    usage_count INTEGER DEFAULT 0,
-                    last_used TIMESTAMP,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    author TEXT,
-                    version TEXT
-                );
-
-                -- Saved searches table
-                CREATE TABLE IF NOT EXISTS saved_searches (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    query_id INTEGER,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    schedule TEXT,
-                    last_run TIMESTAMP,
-                    next_run TIMESTAMP,
-                    enabled BOOLEAN DEFAULT 1,
-                    notification_email TEXT,
-                    FOREIGN KEY (query_id) REFERENCES queries (id)
-                );
-
                 -- Create indexes
                 CREATE INDEX IF NOT EXISTS idx_queries_platform ON queries(platform);
                 CREATE INDEX IF NOT EXISTS idx_results_query_id ON results(query_id);
-                CREATE INDEX IF NOT EXISTS idx_templates_category ON templates(category);
             ''')
 
+    def create_template_tables(self):
+        """Create all necessary tables for template management"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Templates table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS templates (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        platform TEXT NOT NULL,
+                        query_template TEXT NOT NULL,
+                        parameters TEXT,
+                        description TEXT,
+                        author TEXT,
+                        version TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                # Template usage tracking
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS template_usage (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        template_id INTEGER,
+                        query_id INTEGER,
+                        parameters_used TEXT,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        user TEXT,
+                        FOREIGN KEY (template_id) REFERENCES templates (id),
+                        FOREIGN KEY (query_id) REFERENCES queries (id)
+                    )
+                ''')
+                
+                # Template validations
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS template_validations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        template_id INTEGER,
+                        is_valid BOOLEAN,
+                        error_message TEXT,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (template_id) REFERENCES templates (id)
+                    )
+                ''')
+                
+                # Template modifications history
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS template_modifications (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        template_id INTEGER,
+                        field_modified TEXT,
+                        old_value TEXT,
+                        new_value TEXT,
+                        modified_by TEXT,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (template_id) REFERENCES templates (id)
+                    )
+                ''')
+                
+                # Template tags
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS template_tags (
+                        template_id INTEGER,
+                        tag TEXT,
+                        PRIMARY KEY (template_id, tag),
+                        FOREIGN KEY (template_id) REFERENCES templates (id)
+                    )
+                ''')
+                
+                # Create necessary indexes
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_templates_category 
+                    ON templates(category)
+                ''')
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_template_usage_template_id 
+                    ON template_usage(template_id)
+                ''')
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_template_validations_template_id 
+                    ON template_validations(template_id)
+                ''')
+                
+        except Exception as e:
+            logging.error(f"Error creating template tables: {e}")
+            raise DatabaseError(f"Failed to create template tables: {str(e)}")
     def add_query(self, name: str, platform: str, query: str, **kwargs) -> int:
         """Add a new query to the database"""
         with sqlite3.connect(self.db_path) as conn:
@@ -1944,6 +2003,46 @@ class MainWindow(QMainWindow):
         except Exception as e:
             logging.error(f"Error saving notes: {e}")
             QMessageBox.critical(self, "Error", f"Failed to save notes: {str(e)}")
+
+    def get_current_item_id(self) -> Optional[int]:
+        """
+        Obtiene el ID del elemento actualmente seleccionado.
+        
+        Returns:
+            Optional[int]: ID del elemento seleccionado o None si no hay selección
+        """
+        try:
+            # Verificar la pestaña activa
+            current_tab = self.tabs.currentWidget()
+            
+            # Obtener el ID según el contexto
+            if current_tab == self.templates_tab:
+                # Si estamos en la pestaña de templates
+                current_item = self.templates_list.currentItem()
+                if current_item:
+                    template_data = current_item.data(Qt.ItemDataRole.UserRole)
+                    return template_data.get('id')
+                    
+            elif current_tab == self.automation_tab:
+                # Si estamos en la pestaña de automatización
+                current_item = self.automation_list.currentItem()
+                if current_item:
+                    automation_data = current_item.data(Qt.ItemDataRole.UserRole)
+                    return automation_data.get('id')
+                    
+            else:
+                # Para resultados de búsqueda y otras vistas
+                if hasattr(self, 'results_analyzer') and self.results_analyzer.df is not None:
+                    # Si tenemos resultados activos, usar el ID de la búsqueda actual
+                    query_id = self.db_manager.get_last_query_id()
+                    if query_id:
+                        return query_id
+            
+            return None
+            
+        except Exception as e:
+            logging.error(f"Error getting current item ID: {e}")
+            return None
 
     def clear_notes(self):
         """Clear the notes editor"""

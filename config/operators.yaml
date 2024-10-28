@@ -1,0 +1,103 @@
+# Search Operators Configuration
+
+shodan:
+  # Network Operators
+  port: "port:{}"
+  protocol: "protocol:{}"
+  ip: "ip:{}"
+  asn: "asn:{}"
+  org: "org:{}"
+  isp: "isp:{}"
+  hostname: "hostname:{}"
+  domain: "domain:{}"
+  net: "net:{}"
+
+  # Location Operators
+  country: "country:{}"
+  city: "city:{}"
+  region: "region:{}"
+  postal: "postal:{}"
+  
+  # Service Operators
+  product: "product:{}"
+  version: "version:{}"
+  os: "os:{}"
+  device: "device:{}"
+  ssl: "ssl:{}"
+  ssl.version: "ssl.version:{}"
+  ssl.cert.subject.cn: "ssl.cert.subject.cn:{}"
+  ssl.cert.issuer.cn: "ssl.cert.issuer.cn:{}"
+  
+  # HTTP Operators
+  http.title: "http.title:{}"
+  http.status: "http.status:{}"
+  http.component: "http.component:{}"
+  http.server: "http.server:{}"
+  http.html: "http.html:{}"
+  
+  # Security Operators
+  vuln: "vuln:{}"
+  has_vuln: "has_vuln:{}"
+  cvss: "cvss:{}"
+  cve: "cve:{}"
+  
+  # Cloud Operators
+  cloud.provider: "cloud.provider:{}"
+  cloud.service: "cloud.service:{}"
+  cloud.region: "cloud.region:{}"
+  
+  # Container Operators
+  container: "container:{}"
+  container.name: "container.name:{}"
+  container.version: "container.version:{}"
+  
+  # Time Operators
+  before: "before:{}"
+  after: "after:{}"
+
+censys:
+  # Network Services
+  services.port: "services.port: {}"
+  services.service_name: "services.service_name: {}"
+  services.transport_protocol: "services.transport_protocol: {}"
+  
+  # Software Information
+  services.software.product: "services.software.product: {}"
+  services.software.vendor: "services.software.vendor: {}"
+  services.software.version: "services.software.version: {}"
+  
+  # Location Information
+  location.country: "location.country: {}"
+  location.country_code: "location.country_code: {}"
+  location.city: "location.city: {}"
+  location.province: "location.province: {}"
+  
+  # Autonomous System
+  autonomous_system.asn: "autonomous_system.asn: {}"
+  autonomous_system.organization: "autonomous_system.organization: {}"
+  autonomous_system.bgp_prefix: "autonomous_system.bgp_prefix: {}"
+  
+  # TLS/SSL Certificates
+  services.tls.certificates.leaf_data.issuer.common_name: "services.tls.certificates.leaf_data.issuer.common_name: {}"
+  services.tls.certificates.leaf_data.subject.common_name: "services.tls.certificates.leaf_data.subject.common_name: {}"
+  services.tls.version: "services.tls.version: {}"
+  
+  # HTTP Services
+  services.http.response.status_code: "services.http.response.status_code: {}"
+  services.http.response.html_title: "services.http.response.html_title: {}"
+  services.http.response.headers.server: "services.http.response.headers.server: {}"
+  
+  # Vulnerabilities
+  services.software.vulnerabilities.id: "services.software.vulnerabilities.id: {}"
+  services.software.vulnerabilities.severity: "services.software.vulnerabilities.severity: {}"
+  services.software.vulnerabilities.cvss_score: "services.software.vulnerabilities.cvss_score: [{}]"
+  
+  # Cloud Services
+  cloud.provider: "cloud.provider: {}"
+  cloud.service: "cloud.service: {}"
+  cloud.region: "cloud.region: {}"
+  
+  # Industrial Control Systems
+  services.industrial.vendor: "services.industrial.vendor: {}"
+  services.industrial.product: "services.industrial.product: {}"
+  services.industrial.version: "services.industrial.version: {}"

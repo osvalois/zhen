@@ -1,0 +1,136 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+.vs/
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# Build
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Application Specific
+config/local.yaml
+data/*.db
+logs/
+exports/
+*.qss.bak
+*.yaml.bak
+.env.local
+.env.*.local
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Security
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Temporary files
+*.bak
+*.swp
+*.tmp
+*~
+tmp/
+
+# Documentation
+docs/_build/
+site/
+
+# Profiling
+*.stats
+*.prof
+profile.out
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.sqlite
+*.db
+*.sql
+
+# Configuration
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+jspm_packages/
+bower_components/
+
+# Distribution
+dist/
+build/
+out/
+
+# Cache
+.cache/
+.npm/
+.eslintcache

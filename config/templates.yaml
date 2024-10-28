@@ -1,0 +1,146 @@
+# Search Templates Configuration
+
+vulnerability_detection:
+  critical_vulns:
+    name: "Critical Vulnerabilities"
+    description: "Detect systems with critical vulnerabilities"
+    platforms:
+      shodan:
+        query: "vuln:critical port:{ports} country:{country}"
+        parameters:
+          ports:
+            - 80
+            - 443
+            - 8080
+          country: "US"
+      censys:
+        query: "services.software.vulnerabilities.severity: CRITICAL AND location.country: {country}"
+        parameters:
+          country: "US"
+
+  log4j:
+    name: "Log4j Vulnerability"
+    description: "Detect systems potentially vulnerable to Log4j"
+    platforms:
+      shodan:
+        query: 'http.favicon.hash:-601665621 product:"Apache" port:8080,80,443'
+      censys:
+        query: 'services.software.product: "Log4j" OR services.software.vendor: "Apache"'
+
+service_discovery:
+  exposed_databases:
+    name: "Exposed Databases"
+    description: "Find exposed database services"
+    platforms:
+      shodan:
+        query: 'port:{ports} product:{products}'
+        parameters:
+          ports:
+            - 3306  # MySQL
+            - 5432  # PostgreSQL
+            - 27017 # MongoDB
+            - 6379  # Redis
+          products:
+            - "MySQL"
+            - "PostgreSQL"
+            - "MongoDB"
+            - "Redis"
+      censys:
+        query: 'services.port: {port} AND services.service_name: {service}'
+
+  kubernetes:
+    name: "Kubernetes Exposure"
+    description: "Detect exposed Kubernetes endpoints"
+    platforms:
+      shodan:
+        query: 'product:"Kubernetes" port:6443,8080,10250'
+      censys:
+        query: 'services.kubernetes.pods.total_count: [1 TO *]'
+
+cloud_infrastructure:
+  aws_exposure:
+    name: "AWS Exposures"
+    description: "Find exposed AWS services"
+    platforms:
+      shodan:
+        query: 'org:"Amazon" port:9200,5601'
+      censys:
+        query: 'autonomous_system.organization: "Amazon" AND services.port: {ports}'
+        parameters:
+          ports:
+            - 9200
+            - 5601
+
+  azure_storage:
+    name: "Azure Storage"
+    description: "Detect exposed Azure storage accounts"
+    platforms:
+      shodan:
+        query: 'product:"Azure Blob Storage"'
+      censys:
+        query: 'services.http.response.headers.server: "Windows-Azure-Blob*"'
+
+industrial_systems:
+  ics_discovery:
+    name: "ICS Systems"
+    description: "Discover Industrial Control Systems"
+    platforms:
+      shodan:
+        query: 'port:502 product:"Modbus" country:{country}'
+        parameters:
+          country: "US"
+      censys:
+        query: 'services.modbus.function AND location.country: {country}'
+
+  scada_systems:
+    name: "SCADA Systems"
+    description: "Find SCADA systems"
+    platforms:
+      shodan:
+        query: 'port:44818 product:"Rockwell"'
+      censys:
+        query: 'services.industrial.vendor: "Rockwell"'
+
+web_applications:
+  web_frameworks:
+    name: "Web Frameworks"
+    description: "Detect common web frameworks"
+    platforms:
+      shodan:
+        query: 'http.component:{framework} port:80,443'
+        parameters:
+          framework:
+            - "Django"
+            - "Rails"
+            - "Laravel"
+            - "Spring"
+      censys:
+        query: 'services.http.response.headers.server: {server}'
+
+  ssl_issues:
+    name: "SSL Issues"
+    description: "Find SSL/TLS issues"
+    platforms:
+      shodan:
+        query: 'ssl.cert.expired:true port:443'
+      censys:
+        query: 'services.tls.validation.valid: false'
+
+network_infrastructure:
+  vpn_endpoints:
+    name: "VPN Endpoints"
+    description: "Discover VPN endpoints"
+    platforms:
+      shodan:
+        query: 'port:500,4500 "IKE" country:{country}'
+      censys:
+        query: 'services.ike.version: * AND location.country: {country}'
+
+  dns_servers:
+    name: "DNS Servers"
+    description: "Find open DNS servers"
+    platforms:
+      shodan:
+        query: 'port:53 product:"DNS" country:{country}'
+      censys:
+        query: 'services.dns.running: true AND location.country: {country}'
